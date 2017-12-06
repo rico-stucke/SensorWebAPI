@@ -4,17 +4,22 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.math.BigInteger;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Scanner;
 
+/**
+ * Class to handle request for sending Sensor data
+ *
+ * @author Benny Lach
+ */
 public class APIHandler extends HttpServlet {
-
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // TODO: Implement get request
-        // i.e. : Show form to make the post request
-        handleWrongRequest(response);
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        handleGetRequest(req, resp);
     }
 
     @Override
@@ -23,11 +28,37 @@ public class APIHandler extends HttpServlet {
     }
 
     /**
-     * Method to handle POST requests
+     * Method to handle GET requests
      * @param req the request object
      * @param resp the response object
+     * @throws IOException if something went wrong opening the Printwriter
+     */
+    private void handleGetRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        URL fileURL = this.getClass().getResource("userdata.html");
+        Scanner scanner = null;
+        try {
+            scanner = new Scanner(new File(fileURL.toURI()));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        PrintWriter writer = resp.getWriter();
+
+
+
+        while(scanner.hasNextLine()) {
+            writer.write(scanner.nextLine());
+        }
+        writer.flush();
+    }
+
+    /**
+     * Method to handle POST requests
+     *
+     * @param req  the request object
+     * @param resp the response object
      * @throws ServletException if something went wrong
-     * @throws IOException if something went wrong sending the response
+     * @throws IOException      if something went wrong sending the response
      */
     private void handlePostRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String name = req.getParameter("name");
@@ -44,8 +75,10 @@ public class APIHandler extends HttpServlet {
         }
         super.doPost(req, resp);
     }
+
     /**
      * Method to handle wrong or unknown requests
+     *
      * @param resp the respsonse object
      * @throws IOException if something went wrong sending the response
      */
