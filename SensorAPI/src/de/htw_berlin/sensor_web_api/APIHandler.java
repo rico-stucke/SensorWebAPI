@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.net.URL;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -17,6 +20,13 @@ import java.util.Scanner;
  * @author Benny Lach
  */
 public class APIHandler extends HttpServlet {
+    // List containing all valid identifier for a geometry
+    private List<String> validGeometries  = new ArrayList<String>() {{
+        add("point");
+        add("line");
+        add("polygon");
+    }};
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         handleGetRequest(req, resp);
@@ -67,13 +77,17 @@ public class APIHandler extends HttpServlet {
         String userId = req.getParameter("source_user_id");
         String validSince = req.getParameter("valid_since");
         String validUntil = req.getParameter("valid_until");
-        String objectId = req.getParameter("object_id");
+        String geometryType = req.getParameter("geometry_type");
+        String geometryId = req.getParameter("geometry_id");
 
-        if (name == null || value == null || mimeType == null || userId == null ||
-                validSince == null || validUntil == null || objectId == null) {
+        if ( isValid(name) && isValid(value) && isValid(mimeType) && isValid(userId) &&
+                isValid(validSince) && isValid(validUntil) && isValid(geometryType) &&
+                isValid(geometryId) && validGeometries.contains(geometryType.toLowerCase())) {
+            // TODO: - Commit received data to ohdm handler & return content_id in 200 response
+            handleValidRequest(resp);
+        } else {
             handleWrongRequest(resp);
         }
-        super.doPost(req, resp);
     }
 
     /**
@@ -90,5 +104,25 @@ public class APIHandler extends HttpServlet {
         PrintWriter writer = resp.getWriter();
         writer.append("{ \"error\": { \"message\": \"Invalid request\"}}");
         writer.close();
+    }
+
+    /**
+     * Method to handle valid requests
+     * @param resp the response object
+     * @throws IOException If something went wrong sending the response
+     */
+    private void handleValidRequest(HttpServletResponse resp) throws IOException {
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+
+        PrintWriter writer = resp.getWriter();
+        writer.append("{ \"success\"}");
+        writer.close();
+    }
+
+
+    private boolean isValid(String param) {
+        return param != null && param.length() > 0;
     }
 }

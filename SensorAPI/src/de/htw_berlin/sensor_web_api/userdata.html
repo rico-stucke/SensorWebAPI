@@ -18,34 +18,42 @@
 
 <body>
 <div class="container">
-    <form>
+    <form action="/sensordata" method="post">
         <div class="form-group">
             <label for="name">Name:</label>
-            <input type="text" class="form-control" id="name">
+            <input type="text" class="form-control" id="name" name="name">
         </div>
         <div class="form-group">
             <label for="value">Value:</label>
-            <input type="text" class="form-control" id="value">
+            <input type="text" class="form-control" id="value" name="value">
         </div>
         <div class="form-group">
-            <label for="mimeType">MimeType:</label>
-            <input type="text" class="form-control" id="mimeType">
+            <label for="mime_type">MimeType:</label>
+            <input type="text" class="form-control" id="mime_type" name="mime_type">
         </div>
         <div class="form-group">
-            <label for="sourceUserId">User Id:</label>
-            <input type="text" class="form-control" id="sourceUserId">
+            <label for="source_user_id">User Id:</label>
+            <input type="text" class="form-control" id="source_user_id" name="source_user_id">
         </div>
         <div class="form-group">
-            <label for="validSince">Valid since:</label>
-            <input type="text" class="form-control" id="validSince">
+            <label for="valid_since">Valid since:</label>
+            <input type="text" class="form-control" id="valid_since" name="valid_since">
         </div>
         <div class="form-group">
-            <label for="validUntil">Valid until</label>
-            <input type="text" class="form-control" id="validUntil">
+            <label for="valid_until">Valid until</label>
+            <input type="text" class="form-control" id="valid_until" name="valid_until">
         </div>
         <div class="form-group">
-            <label for="objectId">Geo Object Id</label>
-            <input type="text" class="form-control" id="objectId">
+            <label for="geometry_type">Geometry Type</label>
+            <select class="form-control" id="geometry_type" name="geometry_type">
+                <option>Point</option>
+                <option>Line</option>
+                <option>Polygon</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="geometry_id">Geometry Object Id</label>
+            <input type="text" class="form-control" id="geometry_id" name="geometry_id">
         </div>
         <button type="submit" class="btn btn-default">Submit</button>
     </form>
