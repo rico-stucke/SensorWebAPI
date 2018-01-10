@@ -5,13 +5,13 @@
          version="3.1">
 
     <servlet>
-        <servlet-name>apiHandler</servlet-name>
-        <servlet-class>de.htw_berlin.sensor_web_api.APIHandler</servlet-class>
+        <servlet-name>contentController</servlet-name>
+        <servlet-class>de.htw_berlin.sensor_web_api.ContentController</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>apiHandler</servlet-name>
-        <url-pattern>/sensordata</url-pattern>
+        <servlet-name>contentController</servlet-name>
+        <url-pattern>/content</url-pattern>
     </servlet-mapping>
 </web-app>

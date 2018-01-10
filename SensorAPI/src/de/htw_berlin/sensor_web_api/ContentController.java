@@ -9,17 +9,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.net.URL;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-/**
- * Class to handle request for sending Sensor data
- *
- * @author Benny Lach
- */
-public class APIHandler extends HttpServlet {
+public class ContentController extends HttpServlet {
+
     // List containing all valid identifier for a geometry
     private List<String> validGeometries  = new ArrayList<String>() {{
         add("point");
@@ -120,7 +115,6 @@ public class APIHandler extends HttpServlet {
         writer.append("{ \"success\"}");
         writer.close();
     }
-
 
     private boolean isValid(String param) {
         return param != null && param.length() > 0;
