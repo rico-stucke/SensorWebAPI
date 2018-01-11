@@ -39,7 +39,7 @@ public class ContentController extends HttpServlet {
      * @throws IOException if something went wrong opening the Printwriter
      */
     private void handleGetRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        URL fileURL = this.getClass().getResource("userdata.html");
+        URL fileURL = this.getClass().getResource("content.html");
         Scanner scanner = null;
         try {
             scanner = new Scanner(new File(fileURL.toURI()));
@@ -58,7 +58,7 @@ public class ContentController extends HttpServlet {
     }
 
     /**
-     * Method to handle POST requests
+     * Method to handle POST requests to create a Content object
      *
      * @param req  the request object
      * @param resp the response object
@@ -66,56 +66,31 @@ public class ContentController extends HttpServlet {
      * @throws IOException      if something went wrong sending the response
      */
     private void handlePostRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String name = req.getParameter("name");
         String value = req.getParameter("value");
-        String mimeType = req.getParameter("mime_type");
-        String userId = req.getParameter("source_user_id");
-        String validSince = req.getParameter("valid_since");
-        String validUntil = req.getParameter("valid_until");
-        String geometryType = req.getParameter("geometry_type");
-        String geometryId = req.getParameter("geometry_id");
+        String userId = req.getParameter("sourceUserId");
+        String sensorId = req.getParameter("sensorId");
+        String validSince = req.getParameter("validSince");
+        String validUntil = req.getParameter("validUntil");
+        String geometryType = req.getParameter("geometryType");
+        String geometryId = req.getParameter("geometryId");
 
-        if ( isValid(name) && isValid(value) && isValid(mimeType) && isValid(userId) &&
+        if ( isValid(value) && isValid(sensorId) && isValid(userId) &&
                 isValid(validSince) && isValid(validUntil) && isValid(geometryType) &&
                 isValid(geometryId) && validGeometries.contains(geometryType.toLowerCase())) {
             // TODO: - Commit received data to ohdm handler & return content_id in 200 response
-            handleValidRequest(resp);
+            ResponseHelper.handleValidRequest(resp);
         } else {
-            handleWrongRequest(resp);
+            ResponseHelper.handleWrongRequest(resp);
         }
     }
 
     /**
-     * Method to handle wrong or unknown requests
+     * Method to valid a given String
+     * It just checks if the String is not null nor empty
      *
-     * @param resp the respsonse object
-     * @throws IOException if something went wrong sending the response
+     * @param param The String to validate
+     * @return true or false
      */
-    private void handleWrongRequest(HttpServletResponse resp) throws IOException {
-        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        resp.setContentType("application/json");
-        resp.setCharacterEncoding("UTF-8");
-
-        PrintWriter writer = resp.getWriter();
-        writer.append("{ \"error\": { \"message\": \"Invalid request\"}}");
-        writer.close();
-    }
-
-    /**
-     * Method to handle valid requests
-     * @param resp the response object
-     * @throws IOException If something went wrong sending the response
-     */
-    private void handleValidRequest(HttpServletResponse resp) throws IOException {
-        resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType("application/json");
-        resp.setCharacterEncoding("UTF-8");
-
-        PrintWriter writer = resp.getWriter();
-        writer.append("{ \"success\"}");
-        writer.close();
-    }
-
     private boolean isValid(String param) {
         return param != null && param.length() > 0;
     }

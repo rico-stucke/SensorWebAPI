@@ -10,8 +10,19 @@
         <load-on-startup>1</load-on-startup>
     </servlet>
 
+    <servlet>
+        <servlet-name>sensorController</servlet-name>
+        <servlet-class>de.htw_berlin.sensor_web_api.SensorController</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>contentController</servlet-name>
         <url-pattern>/content</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>sensorController</servlet-name>
+        <url-pattern>/sensor</url-pattern>
     </servlet-mapping>
 </web-app>

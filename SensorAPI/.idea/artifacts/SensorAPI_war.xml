@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" build-on-make="true" name="SensorAPI:war">
+    <output-path>$PROJECT_DIR$/out/artifacts/SensorAPI_war</output-path>
+    <root id="archive" name="SensorAPI_war.war">
+      <element id="artifact" artifact-name="SensorAPI:war exploded" />
+    </root>
+  </artifact>
+</component>
