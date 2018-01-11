@@ -18,7 +18,7 @@ public class ResponseHelper {
         resp.setCharacterEncoding("UTF-8");
 
         PrintWriter writer = resp.getWriter();
-        writer.append("{ \"error\": { \"message\": \"Invalid request\"}}");
+        writer.append("{\"error\": {\"message\": \"Invalid request\"}}");
         writer.close();
     }
 
@@ -33,7 +33,7 @@ public class ResponseHelper {
         resp.setCharacterEncoding("UTF-8");
 
         PrintWriter writer = resp.getWriter();
-        writer.append("{ \"success\"}");
+        writer.append("{\"success\"}");
         writer.close();
     }
 }
