@@ -3,6 +3,11 @@ package de.htw_berlin.sensor_web_api;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 
+/**
+ * Helper for sending Responses
+ *
+ * @author Benny Lach
+ */
 public class ResponseHelper {
 
     /**
