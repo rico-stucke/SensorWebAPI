@@ -1,5 +1,7 @@
 package de.htw_berlin.sensor_web_api;
 
+import de.htw_berlin.sensor_web_api.helper.JSONParser;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -9,9 +11,37 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
+/**
+ * Controller for handling requests for /sensor
+ *
+ * @author Benny Lach
+ */
 public class SensorController extends HttpServlet {
+
+    /**
+     * Enum representing the Content-Type for a given request
+     */
+    private enum RequestType {
+        Body, Query, Undefined;
+
+        private final static String BODY_ID = "application/json";
+        private final static String QUERY_ID = "application/x-www-form-urlencoded";
+
+        static RequestType fromString(String source) {
+            if (source.contains(RequestType.BODY_ID)) {
+                return RequestType.Body;
+            }
+            if (source.contains(RequestType.QUERY_ID)) {
+                return RequestType.Query;
+            }
+            return RequestType.Undefined;
+        }
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         handleGetRequest(req, resp);
@@ -19,7 +49,11 @@ public class SensorController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        handlePostRequest(req, resp);
+        try {
+            handlePostRequest(req, resp);
+        } catch (Exception e) {
+            throw new IOException(e.getMessage());
+        }
     }
 
     /**
@@ -50,10 +84,59 @@ public class SensorController extends HttpServlet {
      *
      * @param req  the request object
      * @param resp the response object
-     * @throws ServletException if something went wrong
-     * @throws IOException      if something went wrong sending the response
+     * @throws Exception if something went wrong
      */
-    private void handlePostRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    private void handlePostRequest(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        RequestType type = RequestType.fromString(req.getContentType());
+
+        switch (type) {
+            case Body:
+                handleBodyRequest(req, resp);
+                break;
+            case Query:
+                handleQueryRequest(req, resp);
+                break;
+            default:
+                ResponseHelper.handleWrongRequest(resp);
+
+        }
+    }
+
+    /**
+     * Method to handle a post request with Content-Type: application/json
+     *
+     * @param req the request object
+     * @param resp the response object
+     * @throws IOException if something went wrong
+     */
+    private void handleBodyRequest(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        String bodyString = req.getReader().lines().collect(Collectors.joining());
+        Map<String, String> jsonMap = JSONParser.parse(bodyString);
+
+        if (jsonMap == null) {
+            ResponseHelper.handleWrongRequest(resp);
+        } else {
+            String name =  jsonMap.get("name");
+            String mimeType = jsonMap.get("mimeType");
+            String userId = jsonMap.get("sourceUserId");
+
+            if ( isValid(name) && isValid(mimeType) && isValid(userId)) {
+                // TODO: - Commit received data to ohdm handler & return content_id in 200 response
+                ResponseHelper.handleValidCreateRequest(resp, "42");
+            } else {
+                ResponseHelper.handleWrongRequest(resp);
+            }
+        }
+    }
+
+    /**
+     * Method to handle POST requests with Content-Type: application/x-www-form-urlencoded
+     *
+     * @param req the request object
+     * @param resp the response object
+     * @throws IOException if something went wrong
+     */
+    private void handleQueryRequest(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         String name = req.getParameter("name");
         String mimeType = req.getParameter("mimeType");
         String userId = req.getParameter("sourceUserId");
@@ -67,8 +150,7 @@ public class SensorController extends HttpServlet {
     }
 
     /**
-     * Method to valid a given String
-     * It just checks if the String is not null nor empty
+     * Method to valid a given String - it only checks if it's not null nor empty
      *
      * @param param The String to validate
      * @return true or false
