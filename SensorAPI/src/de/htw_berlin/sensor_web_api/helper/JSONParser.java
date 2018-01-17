@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Benny Lach
- *
  * JSON Parser
+ *
+ * @author Benny Lach
  */
 public class JSONParser {
 
@@ -29,8 +29,7 @@ public class JSONParser {
     private static String reduce(String input) {
         input = input
                 .replace("{", "")
-                .replaceAll("}", "")
-                .replaceAll("\"", "");
+                .replaceAll("}", "");
 
         return input;
     }
@@ -46,15 +45,14 @@ public class JSONParser {
 
         HashMap<String, String> map = new HashMap<>();
 
-        System.out.println("Reduced json string: " + input);
-        String[] pairs = input.split(",");
+        String[] pairs = input.split("\",\"");
 
         for (String pair : pairs) {
-            String[] kv = pair.split(":");
+            String[] kv = pair.split("\":\"");
             if (kv.length != 2) {
                 return null;
             }
-            map.put(kv[0], kv[1]);
+            map.put(kv[0].replaceAll("\"", ""), kv[1].replaceAll("\"", ""));
         }
         return map;
     }
