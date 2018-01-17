@@ -56,17 +56,11 @@ public class ResponseHelper {
      * @param resp the response object
      * @throws Exception if the response object is null or something went wrong sending the response
      */
-    static void handleValidRequest(HttpServletResponse resp) throws Exception {
+    static void handleValidUpdateRequest(HttpServletResponse resp) throws Exception {
         if (resp == null) {
             throw new Exception("The HttpServletResponse object must not be null!");
         }
 
-        resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType("application/json");
-        resp.setCharacterEncoding("UTF-8");
-
-        PrintWriter writer = resp.getWriter();
-        writer.append("{\"status\": \"success\"}");
-        writer.close();
+        resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 }

@@ -66,7 +66,7 @@ public class ContentUpdateController extends HttpServlet {
             String id = getContentId(uri);
 
             if ( isValid(validUntil) && update(id, validUntil)) {
-                ResponseHelper.handleValidCreateRequest(resp, "42");
+                ResponseHelper.handleValidUpdateRequest(resp);
             } else {
                 ResponseHelper.handleWrongRequest(resp);
             }
@@ -86,7 +86,7 @@ public class ContentUpdateController extends HttpServlet {
         String id = getContentId(uri);
 
         if ( isValid(validUntil) && update(id, validUntil)) {
-            ResponseHelper.handleValidCreateRequest(resp, "42");
+            ResponseHelper.handleValidUpdateRequest(resp);
         } else {
             ResponseHelper.handleWrongRequest(resp);
         }
