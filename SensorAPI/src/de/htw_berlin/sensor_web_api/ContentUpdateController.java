@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ContentUpdateController extends HttpServlet {
@@ -61,9 +62,10 @@ public class ContentUpdateController extends HttpServlet {
             ResponseHelper.handleWrongRequest(resp);
         } else {
             String validUntil = jsonMap.get("validUntil");
+            String uri = req.getRequestURI();
+            String id = getContentId(uri);
 
-            if ( isValid(validUntil) ) {
-                // TODO: - Commit received data to ohdm handler & return content_id in 201 response
+            if ( isValid(validUntil) && update(id, validUntil)) {
                 ResponseHelper.handleValidCreateRequest(resp, "42");
             } else {
                 ResponseHelper.handleWrongRequest(resp);
@@ -80,15 +82,24 @@ public class ContentUpdateController extends HttpServlet {
      */
     private void handleQueryRequest(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         String validUntil = req.getParameter("validUntil");
+        String uri = req.getRequestURI();
+        String id = getContentId(uri);
 
-        if ( isValid(validUntil) ) {
-            // TODO: - Commit received data to ohdm handler & return content_id in 201 response
+        if ( isValid(validUntil) && update(id, validUntil)) {
             ResponseHelper.handleValidCreateRequest(resp, "42");
         } else {
             ResponseHelper.handleWrongRequest(resp);
         }
     }
 
+    private  Boolean update(String id, String newValidUntil) {
+        if (!isValidId(id)) {
+            return false;
+        }
+
+        // TODO: - Commit received data to ohdm handler & return 204 response
+        return true;
+    }
     /**
      * Method to validate a given String
      * It just checks if the String is not null nor empty
@@ -98,5 +109,24 @@ public class ContentUpdateController extends HttpServlet {
      */
     private boolean isValid(String param) {
         return param != null && param.length() > 0;
+    }
+
+    /**
+     * Method to get the contentId form the given uri
+     * @param uri the uri
+     * @return The parsed contentId, is null if not valid
+     */
+    private String getContentId(String uri) {
+
+        String[] seperated = uri.split("/");
+        // This should never happen, but hey - why not ...
+        if (seperated.length == 0 ) {
+            return null;
+        }
+        return seperated[seperated.length-1];
+    }
+
+    private Boolean isValidId(String input) {
+        return Pattern.matches("\\d.", input);
     }
 }
