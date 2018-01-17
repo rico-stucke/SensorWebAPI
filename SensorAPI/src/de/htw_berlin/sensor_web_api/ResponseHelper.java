@@ -46,7 +46,7 @@ public class ResponseHelper {
         resp.setCharacterEncoding("UTF-8");
 
         PrintWriter writer = resp.getWriter();
-        writer.append("{\"id\": \"" + id + "\"}");
+        writer.append("{\"id\": " + id + "}");
         writer.close();
     }
 
