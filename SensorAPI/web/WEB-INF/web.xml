@@ -11,6 +11,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>ContentUpdateController</servlet-name>
+        <servlet-class>de.htw_berlin.sensor_web_api.ContentUpdateController</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>SensorController</servlet-name>
         <servlet-class>de.htw_berlin.sensor_web_api.SensorController</servlet-class>
         <load-on-startup>1</load-on-startup>
@@ -31,6 +37,11 @@
     <servlet-mapping>
         <servlet-name>ContentController</servlet-name>
         <url-pattern>/content</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ContentUpdateController</servlet-name>
+        <url-pattern>/content/*</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
