@@ -1,5 +1,7 @@
 package de.htw_berlin.sensor_web_api;
 
+import de.htw_berlin.sensor_web_api.helper.*;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -11,8 +13,15 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
+/**
+ * Controller for handling requests for /content
+ *
+ * @author Benny Lach
+ */
 public class ContentController extends HttpServlet {
 
     // List containing all valid identifier for a geometry
@@ -29,7 +38,11 @@ public class ContentController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        handlePostRequest(req, resp);
+        try {
+            handlePostRequest(req, resp);
+        } catch (Exception e) {
+            throw new IOException(e.getMessage());
+        }
     }
 
     /**
@@ -62,10 +75,65 @@ public class ContentController extends HttpServlet {
      *
      * @param req  the request object
      * @param resp the response object
-     * @throws ServletException if something went wrong
-     * @throws IOException      if something went wrong sending the response
+     * @throws Exception if something went wrong
      */
-    private void handlePostRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    private void handlePostRequest(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        RequestType type = RequestType.fromString(req.getContentType());
+
+        switch (type) {
+            case Body:
+                handleBodyRequest(req, resp);
+                break;
+            case Query:
+                handleQueryRequest(req, resp);
+                break;
+            default:
+                ResponseHelper.handleWrongRequest(resp);
+
+        }
+    }
+
+    /**
+     * Method to handle a post request with Content-Type: application/json
+     *
+     * @param req the request object
+     * @param resp the response object
+     * @throws IOException if something went wrong
+     */
+    private void handleBodyRequest(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        String bodyString = req.getReader().lines().collect(Collectors.joining());
+        Map<String, String> jsonMap = JSONParser.parse(bodyString);
+
+        if (jsonMap == null) {
+            ResponseHelper.handleWrongRequest(resp);
+        } else {
+            String value = jsonMap.get("value");
+            String userId = jsonMap.get("sourceUserId");
+            String sensorId = jsonMap.get("sensorId");
+            String validSince = jsonMap.get("validSince");
+            String validUntil = jsonMap.get("validUntil");
+            String geometryType = jsonMap.get("geometryType");
+            String geometryId = jsonMap.get("geometryId");
+
+            if ( isValid(value) && isValid(sensorId) && isValid(userId) &&
+                    isValid(validSince) && isValid(validUntil) && isValid(geometryType) &&
+                    isValid(geometryId) && validGeometries.contains(geometryType.toLowerCase())) {
+                // TODO: - Commit received data to ohdm handler & return content_id in 201 response
+                ResponseHelper.handleValidCreateRequest(resp, "42");
+            } else {
+                ResponseHelper.handleWrongRequest(resp);
+            }
+        }
+    }
+
+    /**
+     * Method to handle POST requests with Content-Type: application/x-www-form-urlencoded
+     *
+     * @param req the request object
+     * @param resp the response object
+     * @throws IOException if something went wrong
+     */
+    private void handleQueryRequest(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         String value = req.getParameter("value");
         String userId = req.getParameter("sourceUserId");
         String sensorId = req.getParameter("sensorId");
@@ -77,15 +145,15 @@ public class ContentController extends HttpServlet {
         if ( isValid(value) && isValid(sensorId) && isValid(userId) &&
                 isValid(validSince) && isValid(validUntil) && isValid(geometryType) &&
                 isValid(geometryId) && validGeometries.contains(geometryType.toLowerCase())) {
-            // TODO: - Commit received data to ohdm handler & return content_id in 200 response
-            ResponseHelper.handleValidRequest(resp);
+            // TODO: - Commit received data to ohdm handler & return content_id in 201 response
+            ResponseHelper.handleValidCreateRequest(resp, "42");
         } else {
             ResponseHelper.handleWrongRequest(resp);
         }
     }
 
     /**
-     * Method to valid a given String
+     * Method to validate a given String
      * It just checks if the String is not null nor empty
      *
      * @param param The String to validate
