@@ -122,7 +122,7 @@ public class SensorController extends HttpServlet {
 
         if ( isValid(name) && isValid(mimeType) && isValid(userId)) {
             // TODO: - Commit received data to ohdm handler & return content_id in 200 response
-            ResponseHelper.handleValidRequest(resp);
+            ResponseHelper.handleValidCreateRequest(resp, "42");
         } else {
             ResponseHelper.handleWrongRequest(resp);
         }
