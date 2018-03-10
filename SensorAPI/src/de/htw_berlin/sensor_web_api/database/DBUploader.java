@@ -28,6 +28,8 @@ public class DBUploader {
      *
      */
     public DBUploader() throws Exception {
+        Class.forName("org.postgresql.Driver");
+
         Map<String,String> env = System.getenv();
 
         url = env.get("OHDM_URL");
