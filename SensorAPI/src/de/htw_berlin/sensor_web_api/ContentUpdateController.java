@@ -1,6 +1,7 @@
 package de.htw_berlin.sensor_web_api;
 
 
+import de.htw_berlin.sensor_web_api.database.DBUploader;
 import de.htw_berlin.sensor_web_api.helper.JSONParser;
 import de.htw_berlin.sensor_web_api.helper.RequestType;
 
@@ -13,7 +14,28 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * Controller for handling requests for /sensor/{id}
+ *
+ * @author Benny Lach
+ */
 public class ContentUpdateController extends HttpServlet {
+
+    private DBUploader db;
+
+    /**
+     * Public initializer
+     */
+    public ContentUpdateController() throws Exception {
+        super();
+
+        try {
+            db = new DBUploader();
+
+        } catch (Exception e) {
+            System.out.println("Failed to hook up DBUploader instance: " + e.getMessage());
+        }
+    }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -65,7 +87,7 @@ public class ContentUpdateController extends HttpServlet {
             String uri = req.getRequestURI();
             String id = getContentId(uri);
 
-            if ( isValid(validUntil) && update(id, validUntil)) {
+            if ( update(id, validUntil)) {
                 ResponseHelper.handleValidUpdateRequest(resp);
             } else {
                 ResponseHelper.handleWrongRequest(resp);
@@ -85,21 +107,30 @@ public class ContentUpdateController extends HttpServlet {
         String uri = req.getRequestURI();
         String id = getContentId(uri);
 
-        if ( isValid(validUntil) && update(id, validUntil)) {
+        if ( update(id, validUntil)) {
             ResponseHelper.handleValidUpdateRequest(resp);
         } else {
             ResponseHelper.handleWrongRequest(resp);
         }
     }
 
+    /**
+     * Method to update an existing data set on the db
+     *
+     * @param id The id of the data set
+     * @param newValidUntil the new validUntil date to use
+     * @return Boolean to indicate success or fail
+     */
     private  Boolean update(String id, String newValidUntil) {
-        if (!isValidId(id)) {
+        if (!isValidId(id) || !isValid(newValidUntil)) {
             return false;
         }
 
-        // TODO: - Commit received data to ohdm handler & return 204 response
+        // TODO: - Commit received data to ohdm handler & return result
+        // There is no implementation for updating a data set in the underlying DBUploader class
         return true;
     }
+
     /**
      * Method to validate a given String
      * It just checks if the String is not null nor empty
@@ -113,6 +144,7 @@ public class ContentUpdateController extends HttpServlet {
 
     /**
      * Method to get the contentId form the given uri
+     *
      * @param uri the uri
      * @return The parsed contentId, is null if not valid
      */

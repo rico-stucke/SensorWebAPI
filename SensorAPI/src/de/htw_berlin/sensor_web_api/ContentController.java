@@ -1,5 +1,7 @@
 package de.htw_berlin.sensor_web_api;
 
+import de.htw_berlin.sensor_web_api.database.DBUploader;
+import de.htw_berlin.sensor_web_api.database.SensorData;
 import de.htw_berlin.sensor_web_api.helper.*;
 
 import javax.servlet.ServletException;
@@ -30,6 +32,22 @@ public class ContentController extends HttpServlet {
         add("line");
         add("polygon");
     }};
+
+    private DBUploader db;
+
+    /**
+     * Public initializer
+     */
+    public ContentController() {
+        super();
+
+        try {
+            db = new DBUploader();
+
+        } catch (Exception e) {
+            System.out.println("Failed to hook up DBUploader instance: " + e.getMessage());
+        }
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -115,14 +133,7 @@ public class ContentController extends HttpServlet {
             String geometryType = jsonMap.get("geometryType");
             String geometryId = jsonMap.get("geometryId");
 
-            if ( isValid(value) && isValid(sensorId) && isValid(userId) &&
-                    isValid(validSince) && isValid(validUntil) && isValid(geometryType) &&
-                    isValid(geometryId) && validGeometries.contains(geometryType.toLowerCase())) {
-                // TODO: - Commit received data to ohdm handler & return content_id in 201 response
-                ResponseHelper.handleValidCreateRequest(resp, "42");
-            } else {
-                ResponseHelper.handleWrongRequest(resp);
-            }
+            createAndResponse(value, userId, sensorId, validSince, validUntil, geometryType, geometryId, resp);
         }
     }
 
@@ -142,16 +153,31 @@ public class ContentController extends HttpServlet {
         String geometryType = req.getParameter("geometryType");
         String geometryId = req.getParameter("geometryId");
 
-        if ( isValid(value) && isValid(sensorId) && isValid(userId) &&
-                isValid(validSince) && isValid(validUntil) && isValid(geometryType) &&
-                isValid(geometryId) && validGeometries.contains(geometryType.toLowerCase())) {
-            // TODO: - Commit received data to ohdm handler & return content_id in 201 response
-            ResponseHelper.handleValidCreateRequest(resp, "42");
+        createAndResponse(value, userId, sensorId, validSince, validUntil, geometryType, geometryId, resp);
+    }
+
+    private void createAndResponse(String value, String userId,
+                                   String sensorId, String validSince,
+                                   String validUntil, String geoType,
+                                   String geoId, HttpServletResponse resp) throws Exception {
+        if (db == null) {
+            ResponseHelper.handleInternalError(resp);
+        } else if ( isValid(value) && isValid(sensorId) && isValid(userId) &&
+                isValid(validSince) && isValid(validUntil) && isValid(geoType) &&
+                isValid(geoId) && validGeometries.contains(geoType.toLowerCase())) {
+
+            SensorData data = new SensorData(sensorId, value, userId, validSince, validUntil, geoType, geoId);
+            long id = db.uploadSensorData(data);
+
+            if (id == -1) {
+                ResponseHelper.handleWrongRequest(resp);
+            } else {
+                ResponseHelper.handleValidCreateRequest(resp, Long.toString(id));
+            }
         } else {
             ResponseHelper.handleWrongRequest(resp);
         }
     }
-
     /**
      * Method to validate a given String
      * It just checks if the String is not null nor empty
