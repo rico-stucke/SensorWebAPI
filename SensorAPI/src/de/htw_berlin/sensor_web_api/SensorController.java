@@ -1,5 +1,6 @@
 package de.htw_berlin.sensor_web_api;
 
+import de.htw_berlin.sensor_web_api.database.DBUploader;
 import de.htw_berlin.sensor_web_api.helper.*;
 
 import javax.servlet.ServletException;
@@ -21,6 +22,23 @@ import java.util.stream.Collectors;
  * @author Benny Lach
  */
 public class SensorController extends HttpServlet {
+    private DBUploader db;
+
+    /**
+     * Default initializer
+     */
+    public SensorController() {
+        super();
+
+        try {
+           db = new DBUploader();
+
+        } catch (Exception e) {
+            System.out.println("Failed to hook up DBUploader instance: " + e.getMessage());
+        }
+    }
+
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         handleGetRequest(req, resp);
@@ -99,12 +117,7 @@ public class SensorController extends HttpServlet {
             String mimeType = jsonMap.get("mimeType");
             String userId = jsonMap.get("sourceUserId");
 
-            if ( isValid(name) && isValid(mimeType) && isValid(userId)) {
-                // TODO: - Commit received data to ohdm handler & return content_id in 200 response
-                ResponseHelper.handleValidCreateRequest(resp, "42");
-            } else {
-                ResponseHelper.handleWrongRequest(resp);
-            }
+            createAndResponse(name, mimeType, userId, resp);
         }
     }
 
@@ -120,12 +133,7 @@ public class SensorController extends HttpServlet {
         String mimeType = req.getParameter("mimeType");
         String userId = req.getParameter("sourceUserId");
 
-        if ( isValid(name) && isValid(mimeType) && isValid(userId)) {
-            // TODO: - Commit received data to ohdm handler & return content_id in 200 response
-            ResponseHelper.handleValidCreateRequest(resp, "42");
-        } else {
-            ResponseHelper.handleWrongRequest(resp);
-        }
+        createAndResponse(name, mimeType, userId, resp);
     }
 
     /**
@@ -136,5 +144,31 @@ public class SensorController extends HttpServlet {
      */
     private boolean isValid(String param) {
         return param != null && param.length() > 0;
+    }
+
+    /**
+     * Method to create a new Sensor object and send correct response
+     *
+     * @param name Sensor name
+     * @param mimeType Sensor mimeType
+     * @param userId User id
+     * @param resp Response object
+     * @throws Exception if something went wrong
+     */
+    private void createAndResponse(String name, String mimeType, String userId, HttpServletResponse resp) throws Exception {
+
+        if (db == null) {
+            ResponseHelper.handleInternalError(resp);
+        } else if ( isValid(name) && isValid(mimeType) && isValid(userId)) {
+            long sensorId = db.createNewSensor(Long.parseLong(userId), name, mimeType);
+
+            if (sensorId == -1) {
+                ResponseHelper.handleWrongRequest(resp);
+            } else {
+                ResponseHelper.handleValidCreateRequest(resp, Long.toString(sensorId));
+            }
+        } else {
+            ResponseHelper.handleWrongRequest(resp);
+        }
     }
 }
