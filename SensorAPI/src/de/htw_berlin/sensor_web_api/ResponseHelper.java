@@ -11,14 +11,25 @@ import java.io.PrintWriter;
 public class ResponseHelper {
 
     /**
-     * Method to handle wrong or unknown requests
+     * Method to handle wrong or unknown requests with default error message
      *
      * @param resp the response object
      * @throws Exception if the response object is null or something went wrong sending the response
      */
     static void handleWrongRequest(HttpServletResponse resp) throws Exception {
-        if (resp == null) {
-            throw new Exception("The HttpServletResponse object must not be null!");
+        handleWrongRequest(resp, "{\"error\": {\"message\": \"Invalid request\"}}");
+    }
+
+    /**
+     * Method to handle wrong or unknown requests with custom error message
+     *
+     * @param resp the response objsct
+     * @param msg the message to send
+     * @throws Exception if the response object | msg is null or something went wrong sending the response
+     */
+    static void handleWrongRequest(HttpServletResponse resp, String msg) throws Exception {
+        if (resp == null || msg == null) {
+            throw new Exception("The HttpServletResponse object or msg String must not be null!");
         }
 
         resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -26,10 +37,30 @@ public class ResponseHelper {
         resp.setCharacterEncoding("UTF-8");
 
         PrintWriter writer = resp.getWriter();
-        writer.append("{\"error\": {\"message\": \"Invalid request\"}}");
+        writer.append(msg);
         writer.close();
     }
 
+    /**
+     * Method to handle internal Server Error
+     *
+     * @param resp the response object
+     * @throws Exception if the response object is null or something went wrong sending the response
+     */
+    static void handleInternalError(HttpServletResponse resp) throws Exception {
+        if (resp == null) {
+            throw new Exception("The HttpServletResponse object must not be null!");
+        }
+
+        resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+
+        PrintWriter writer = resp.getWriter();
+        writer.append("{\"error\": {\"message\": \"Internal Server Error\"}}");
+        writer.close();
+    }
+    
     /**
      * Method to handle a valid create request
      *
